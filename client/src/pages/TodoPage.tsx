@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { fetchTodos } from '../services/todos'
+import { subscribeToTodos } from '../services/todos'
 import type { TodoItem } from '../services/todos'
 import TodoForm from '../components/TodoForm'
 import TodoList from '../components/TodoList'
@@ -13,20 +13,14 @@ export default function TodoPage() {
 
   if (!user) return null
 
-  async function load(uid: string) {
-    setError('')
-    try {
-      const list = await fetchTodos(uid)
-      setTodos(list)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Liste yüklenemedi.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   useEffect(() => {
-    load(user.uid)
+    setLoading(true)
+    const unsub = subscribeToTodos(
+      user.uid,
+      (items) => { setTodos(items); setLoading(false) },
+      (err) => { setError(err.message); setLoading(false) }
+    )
+    return unsub
   }, [user.uid])
 
   const completedCount = todos.filter((t) => t.isCompleted).length
@@ -159,7 +153,7 @@ export default function TodoPage() {
           </div>
 
           {/* Add task form */}
-          <TodoForm uid={user.uid} onAdded={(todo) => setTodos((prev) => [todo, ...prev])} />
+          <TodoForm uid={user.uid} currentCount={todos.length} onAdded={(todo) => setTodos((prev) => [todo, ...prev])} />
 
           {/* Task list */}
           <TodoList

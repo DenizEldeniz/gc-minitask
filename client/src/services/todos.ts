@@ -1,11 +1,11 @@
 import {
     collection,
     doc,
-    getDocs,
     addDoc,
     updateDoc,
     deleteDoc,
     writeBatch,
+    onSnapshot,
     serverTimestamp,
     Timestamp,
 } from 'firebase/firestore'
@@ -54,31 +54,40 @@ function todoFromDoc(id: string, data: TodoDoc): TodoItem {
     }
 }
 
-// ── Firestore functions ────────────────────────────────────────────────────────
-
-export async function fetchTodos(uid: string): Promise<TodoItem[]> {
-    const snap = await getDocs(todosCollection(uid))
-    const items = snap.docs.map((d) => todoFromDoc(d.id, d.data() as TodoDoc))
-    items.sort((a, b) => a.sortOrder - b.sortOrder || (b.createdAt > a.createdAt ? 1 : -1))
-    return items
+function sortTodos(items: TodoItem[]): TodoItem[] {
+    return items.sort((a, b) => a.sortOrder - b.sortOrder || (b.createdAt > a.createdAt ? 1 : -1))
 }
 
+// ── Firestore functions ────────────────────────────────────────────────────────
+
+/** Real-time listener — serves from local cache instantly, syncs from network in background. */
+export function subscribeToTodos(
+    uid: string,
+    onData: (items: TodoItem[]) => void,
+    onError: (err: Error) => void
+): () => void {
+    return onSnapshot(
+        todosCollection(uid),
+        (snap) => {
+            const items = snap.docs.map((d) => todoFromDoc(d.id, d.data() as TodoDoc))
+            onData(sortTodos(items))
+        },
+        (err) => onError(err)
+    )
+}
+
+/** nextSortOrder is computed by the caller from current todos state — no extra Firestore read needed. */
 export async function createTodo(
     uid: string,
     title: string,
+    nextSortOrder: number,
     description?: string,
     deadline?: string
 ): Promise<TodoItem> {
-    const snap = await getDocs(todosCollection(uid))
-    const maxOrder = snap.docs.reduce((max, d) => {
-        const order = (d.data() as TodoDoc).sortOrder ?? 0
-        return Math.max(max, order)
-    }, -1)
-
     const payload: Record<string, unknown> = {
         title: title.trim(),
         isCompleted: false,
-        sortOrder: maxOrder + 1,
+        sortOrder: nextSortOrder,
         createdAt: serverTimestamp(),
     }
     if (description?.trim()) payload.description = description.trim()
@@ -92,7 +101,7 @@ export async function createTodo(
         description: description?.trim(),
         isCompleted: false,
         deadline,
-        sortOrder: maxOrder + 1,
+        sortOrder: nextSortOrder,
         createdAt: new Date().toISOString(),
     }
 }

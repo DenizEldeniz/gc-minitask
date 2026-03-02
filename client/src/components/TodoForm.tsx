@@ -4,10 +4,11 @@ import type { TodoItem } from '../services/todos'
 
 type Props = {
   uid: string
+  currentCount: number
   onAdded?: (todo: TodoItem) => void
 }
 
-export default function TodoForm({ uid, onAdded }: Props) {
+export default function TodoForm({ uid, currentCount, onAdded }: Props) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [deadline, setDeadline] = useState('')
@@ -25,7 +26,7 @@ export default function TodoForm({ uid, onAdded }: Props) {
     setError('')
     setLoading(true)
     try {
-      const todo = await createTodo(uid, t, description || undefined, deadline || undefined)
+      const todo = await createTodo(uid, t, currentCount, description || undefined, deadline || undefined)
       onAdded?.(todo)
       setTitle('')
       setDescription('')
