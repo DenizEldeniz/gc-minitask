@@ -53,10 +53,13 @@ export default function TodoForm({ uid, currentCount, onAdded }: Props) {
           : 'border-white/[0.08] focus-within:border-primary-500/50'
           }`}>
           <input
+            id="todo-title"
+            name="todo-title"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Yeni görev ekle..."
+            autoComplete="off"
             className="flex-1 bg-transparent px-3 py-2 text-white placeholder-white/25 text-sm outline-none"
           />
           {/* Expand toggle */}
@@ -92,6 +95,8 @@ export default function TodoForm({ uid, currentCount, onAdded }: Props) {
         {expanded && (
           <div className="mt-2 space-y-2 animate-fade-in">
             <textarea
+              id="todo-description"
+              name="todo-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Açıklama (opsiyonel)..."
@@ -105,6 +110,8 @@ export default function TodoForm({ uid, currentCount, onAdded }: Props) {
                 />
               </svg>
               <input
+                id="todo-deadline"
+                name="todo-deadline"
                 type="date"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
