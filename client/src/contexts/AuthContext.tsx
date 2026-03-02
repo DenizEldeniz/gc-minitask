@@ -38,19 +38,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (u: User | null) => {
+    const unsub = onAuthStateChanged(auth, (u: User | null) => {
       setUser(u)
+      setLoading(false)
       if (u) {
-        try {
-          const snap = await getDoc(doc(db, 'users', u.uid))
-          setProfile(snap.exists() ? (snap.data() as UserProfile) : null)
-        } catch {
-          setProfile(null)
-        }
+        getDoc(doc(db, 'users', u.uid))
+          .then((snap) => setProfile(snap.exists() ? (snap.data() as UserProfile) : null))
+          .catch(() => setProfile(null))
       } else {
         setProfile(null)
       }
-      setLoading(false)
     })
     return () => unsub()
   }, [])
