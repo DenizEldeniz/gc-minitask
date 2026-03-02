@@ -59,14 +59,9 @@ export default function Register() {
 
         <div className="relative z-10 flex flex-col justify-between p-12 xl:p-16 w-full">
           {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary-400 to-primary-700 flex items-center justify-center shrink-0 shadow-lg shadow-primary-900/40">
-              <span className="text-white font-black text-xs tracking-tighter">GC</span>
-            </div>
-            <div className="flex items-baseline gap-0.5">
-              <span className="text-white font-bold text-base tracking-tight">tasks</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-primary-400 mb-0.5 shrink-0" />
-            </div>
+          <div className="flex items-baseline gap-0.5">
+            <span className="text-white font-bold text-base tracking-tight">tasks</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-primary-400 mb-0.5 shrink-0" />
           </div>
 
           {/* Hero text */}
