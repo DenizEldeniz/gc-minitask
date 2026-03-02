@@ -1,5 +1,10 @@
 # GC-TodoList
 
+Yapay zekayı projenin temelini oluşturmak ve istediğim işlevleri eklemek için kullandım. Ardından Firebase bağlantısını yapay zekadan öğrenerek manuel olarak kendim kurdum.
+Yapay zekadan aldığım kodlarda şu değişiklikleri yaptım: validation eklettim, register ve login arayüzlerini geliştirdim, error handling ekledim. Bunların yanı sıra görevlere deadline özelliği ve sürükle-bırak (DnD) özelliği de benim tarafımdan talep edilerek eklendi.
+"Tamamen size ait" kısmından kasıt sıfırdan kod yazmaksa, dürüstçe söylemem gerekir ki böyle bir kısım yok. Ancak hangi özelliklerin ekleneceğine, nasıl çalışacağına ve yapay zekadan gelen çözümlerin nasıl şekillendirileceğine dair kararlar bana ait.
+Son olarak şunu belirtmek isterim: daha önce frontend alanında çalışmadığım için ve bu projede backend ile veritabanı kısmını büyük ölçüde Firebase üstlendiği için yapay zekadan normalden daha fazla yardım aldım. Frontend kodunu bağımsız olarak denetleyecek kadar bilgim henüz olmadığını da dürüstçe ifade etmek istedim.
+
 Kullanıcıya özel todo listesi uygulaması. **React + TypeScript + Tailwind CSS** (frontend), **Firebase** (Authentication + Firestore).
 
 ## Teknolojiler
@@ -46,51 +51,5 @@ client/
 - Node.js 18+
 - Firebase projesi (ücretsiz — [console.firebase.google.com](https://console.firebase.google.com))
 
-## Firebase kurulumu
 
-1. [Firebase Console](https://console.firebase.google.com) üzerinden proje oluşturun.
-2. **Authentication → Sign-in method → Email/Password** etkinleştirin.
-3. **Firestore Database** oluşturun ve aşağıdaki güvenlik kurallarını uygulayın:
 
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    match /users/{userId}/todos/{todoId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-  }
-}
-```
-
-4. **Proje Ayarları → Uygulamalarınız → Web** üzerinden config bilgilerini alın.
-5. `client/.env` dosyası oluşturup değerleri girin:
-
-```
-VITE_FIREBASE_API_KEY=...
-VITE_FIREBASE_AUTH_DOMAIN=...
-VITE_FIREBASE_PROJECT_ID=...
-VITE_FIREBASE_STORAGE_BUCKET=...
-VITE_FIREBASE_MESSAGING_SENDER_ID=...
-VITE_FIREBASE_APP_ID=...
-```
-
-## Çalıştırma
-
-```bash
-cd client
-npm install
-npm run dev
-```
-
-→ **http://localhost:5173**
-
-## Canlıya alma (Vercel)
-
-1. Projeyi GitHub'a yükleyin.
-2. Vercel'de **Import** → **Root Directory:** `client`
-3. **Environment Variables** bölümüne `VITE_FIREBASE_*` değişkenlerini ekleyin.
-4. Firebase Console → **Authentication → Settings → Authorized domains** bölümüne Vercel domaininizi ekleyin.
