@@ -11,9 +11,9 @@ export default function TodoPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  if (!user) return null
-
+  // Hook'lar koşuldan önce — React hook sırası kuralı
   useEffect(() => {
+    if (!user) return
     setLoading(true)
     const unsub = subscribeToTodos(
       user.uid,
@@ -21,7 +21,9 @@ export default function TodoPage() {
       (err) => { setError(err.message); setLoading(false) }
     )
     return unsub
-  }, [user.uid])
+  }, [user?.uid])
+
+  if (!user) return null
 
   const completedCount = todos.filter((t) => t.isCompleted).length
   const pendingCount = todos.filter((t) => !t.isCompleted).length
@@ -119,7 +121,7 @@ export default function TodoPage() {
         {/* Mobile header */}
         <header className="lg:hidden flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
           <div className="flex items-center">
-            <span className="text-white font-black tracking-tight">GC-TODOLIST</span>
+            <span className="text-white font-black tracking-tight">tasks·</span>
           </div>
           <button onClick={logout} className="text-sm text-white/50 hover:text-white transition-colors">Çıkış</button>
         </header>
@@ -152,8 +154,8 @@ export default function TodoPage() {
             )}
           </div>
 
-          {/* Add task form */}
-          <TodoForm uid={user.uid} currentCount={todos.length} onAdded={(todo) => setTodos((prev) => [todo, ...prev])} />
+          {/* Add task form — onAdded kaldırıldı, onSnapshot listeyi yönetiyor */}
+          <TodoForm uid={user.uid} currentCount={todos.length} />
 
           {/* Task list */}
           <TodoList
