@@ -13,7 +13,6 @@ export default function TodoForm({ uid, currentCount, onAdded }: Props) {
   const [description, setDescription] = useState('')
   const [deadline, setDeadline] = useState('')
   const [expanded, setExpanded] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   const MAX_TITLE = 100
@@ -23,19 +22,25 @@ export default function TodoForm({ uid, currentCount, onAdded }: Props) {
     e.preventDefault()
     const t = title.trim()
     if (!t || titleTooLong) return
+
+    // Optimistic: formu anında sıfırla, yazmayı arka planda yap
+    const savedDesc = description
+    const savedDeadline = deadline
+    setTitle('')
+    setDescription('')
+    setDeadline('')
+    setExpanded(false)
     setError('')
-    setLoading(true)
+
     try {
-      const todo = await createTodo(uid, t, currentCount, description || undefined, deadline || undefined)
+      const todo = await createTodo(uid, t, currentCount, savedDesc || undefined, savedDeadline || undefined)
       onAdded?.(todo)
-      setTitle('')
-      setDescription('')
-      setDeadline('')
-      setExpanded(false)
     } catch (err) {
+      // Hata olursa formu geri doldur
+      setTitle(t)
+      setDescription(savedDesc)
+      setDeadline(savedDeadline)
       setError(err instanceof Error ? err.message : 'Eklenemedi.')
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -73,22 +78,13 @@ export default function TodoForm({ uid, currentCount, onAdded }: Props) {
           {/* Submit */}
           <button
             type="submit"
-            disabled={loading || !title.trim() || titleTooLong}
+            disabled={!title.trim() || titleTooLong}
             className="flex items-center gap-2 px-5 py-2 bg-primary-600 hover:bg-primary-500 disabled:bg-white/[0.06] disabled:text-white/20 text-white text-sm font-semibold rounded-lg transition-colors shrink-0"
           >
-            {loading ? (
-              <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Ekle
-              </>
-            )}
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Ekle
           </button>
         </div>
 
